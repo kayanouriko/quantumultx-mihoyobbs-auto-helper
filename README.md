@@ -2,9 +2,11 @@
 
 一个 quantumultx 脚本, 主要用于米游社原神每日签到的自动运行.
 
-![platform](https://img.shields.io/badge/platform-quantumultx-lightgrey.svg)  [![release](https://img.shields.io/badge/release-v1.0.0-brightgreen.svg)](https://github.com/kayanouriko/quantumultx-genshin-autosign-helpe/releases)
+![platform](https://img.shields.io/badge/platform-quantumultx-lightgrey.svg)  [![release](https://img.shields.io/badge/release-v1.0.0-brightgreen.svg)](https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/releases)
 
 ## 前言
+
+该脚本只适配了国服账号.
 
 使用脚本前, 你需要提前了解如何使用 quantumultx 创建一个脚本任务.
 
@@ -37,7 +39,7 @@
     ```
     7. 此时`Cookie`已经复制到你的粘贴板上了
 
-2. 下载 js 文件: [release](https://github.com/kayanouriko/quantumultx-genshin-autosign-helpe/releases)
+2. 下载 js 文件: [releases](https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/releases)
 3. 打开 js 文件, 在 `$.cookie = ''` 引号内填入步骤 1 获取到的 cookie, 将 js 文件复制到 quantumultx 的 script 文件夹内. quantumultx 应用配置一个脚本任务引用该 js 文件,设置每天凌晨定时运行一次.
 4. quantumultx 配置如下所示类似:
 ```
