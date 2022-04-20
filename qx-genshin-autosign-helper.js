@@ -1,6 +1,6 @@
 /**
  * @name 米游社原神自动签到-qx
- * @version v1.0.0
+ * @version v1.1.0
  * @description 摆脱米游社和健忘症, 每天定时自动签到, 6w 摩拉和一些垃圾还是香的.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/
@@ -25,6 +25,63 @@ const NOTI_TITLE = '米游社原神自动签到'
 const ACT_ID = 'e202009291139501'
 
 /**
+ * 通知相关
+ */
+const errorImg = { 
+    'media-url': 'https://img-static.mihoyo.com/communityweb/upload/4a102d21856350263e83278ac8c48526.png' 
+}
+
+const signedImg = {
+    'media-url': 'https://img-static.mihoyo.com/communityweb/upload/2906e8f5c1c1cc83ef5832167022c679.png'
+}
+
+const notifition = {
+    cookie: {
+        message: `请在脚本中 $.cookie = '' 单引号内填入米游社 Cookie. 点击该通知将跳转获取米游社 Cookie 的教程页面.`,
+        option: {
+            'open-url': 'https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/',
+            ...errorImg
+        }
+    },
+    user: {
+        message: '获取账号信息有误, 错误信息: {0}',
+        option: errorImg
+    },
+    uid: {
+        message: '无法正确获取账号信息关键参数',
+        option: errorImg
+    },
+    sign: {
+        message: '获取账号签到信息有误, 错误信息: {0}',
+        option: errorImg
+    },
+    today: {
+        message: '无法正确获取账号签到信息关键参数',
+        option: errorImg
+    },
+    awards: {
+        message: '获取签到奖励信息有误, 错误信息: {0}',
+        option: errorImg
+    },
+    bind: {
+        message: '请先前往米游社 App 手动签到一次!',
+        option: errorImg
+    },
+    signed: {
+        message: '喂!派蒙今天已经替你签到并领取了奖励, 你不要得寸进尺呀!',
+        option: signedImg
+    },
+    error: {
+        message: '签到操作未成功, 错误信息: {0}',
+        option: errorImg
+    },
+    other: {
+        message: '错误: {0}',
+        option: errorImg
+    }
+}
+
+/**
  * 请求 url 相关
  */
 
@@ -32,6 +89,8 @@ const ACT_ID = 'e202009291139501'
 const GET_USER_INFO = 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hk4e_cn'
 // 获取签到信息
 const GET_SIGN_INFO = 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/info?region={0}&act_id={1}&uid={2}'
+// 获取签到奖励信息
+const GET_SIGN_AWARDS = 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/home?act_id={0}'
 // 签到操作
 const POST_SIGN = 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/sign'
 
@@ -44,47 +103,30 @@ async function main() {
     try {
         // 先验证 cookie 是否已填写
         if ($.cookie === '') {
-            $.msg(NOTI_TITLE, '', `请在脚本中 $.cookie = '' 单引号内填入米游社 Cookie. 点击该通知将跳转获取米游社 cookie 的教程页面.`, { 'open-url': 'https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/', 'media-url': 'https://img-static.mihoyo.com/communityweb/upload/70b5b0c9543ee5080c6ae92fd2797892.png'})
+            notify(notifition.cookie)
             return
         }
         // 获取 cookie 所属的账号信息
-        const { retcode, message, role } = await getUserInfo()
-        if (retcode !== 0) {
-            $.msg(NOTI_TITLE, '', `获取账号信息有误, 错误信息: ${message}`, { 'media-url': 'https://img-static.mihoyo.com/communityweb/upload/70b5b0c9543ee5080c6ae92fd2797892.png' })
-            return
-        }
-        if (!role) {
-            $.msg(NOTI_TITLE, '', `无法正确获取账号信息`, { 'media-url': 'https://img-static.mihoyo.com/communityweb/upload/70b5b0c9543ee5080c6ae92fd2797892.png' })
-            return
-        }
-        const { game_uid, region } = role
-        if (game_uid && region) {
-            // 获取账号签到信息
-            const { retcode, message, today, first_bind, is_sign } = await getSignInfo(game_uid, region)
-            if (retcode !== 0) {
-                $.msg(NOTI_TITLE, '', `获取账号签到信息有误, 错误信息: ${message}`, { 'media-url': 'https://img-static.mihoyo.com/communityweb/upload/70b5b0c9543ee5080c6ae92fd2797892.png' })
-                return
-            }
-            // 未绑定账号
-            if (first_bind) {
-                $.msg(NOTI_TITLE, '', '请先前往米游社 App 手动签到一次!', { 'media-url': 'https://img-static.mihoyo.com/communityweb/upload/70b5b0c9543ee5080c6ae92fd2797892.png' })
-                return
-            }
-            // 是否已经签到
-            if (is_sign) {
-                $.msg(NOTI_TITLE, '', `${today}, 派蒙已偷偷帮你到米游社签到了!`, { 'media-url': 'https://img-static.mihoyo.com/communityweb/upload/87d190a924a83a5d7ed40a819e9a10fb.png' })
-            } else {
-                // 签到操作
-                const { retcode, message } = await postSign(game_uid, region)
-                if (retcode !== 0) {
-                    $.msg(NOTI_TITLE, '', `签到操作未成功, 错误信息: ${message}`, { 'media-url': 'https://img-static.mihoyo.com/communityweb/upload/70b5b0c9543ee5080c6ae92fd2797892.png' })
-                    return
-                }
-                $.msg(NOTI_TITLE, '', `${today}, 派蒙已偷偷帮你到米游社签到了!`, { 'media-url': 'https://img-static.mihoyo.com/communityweb/upload/87d190a924a83a5d7ed40a819e9a10fb.png' })
-            }
+        const user = await getUserInfo()
+        if (!user.isPass) { return }
+        const { game_uid, region, nickname } = user
+        // 获取账号签到信息
+        const sign = await getSignInfo(game_uid, region)
+        if (!sign.isPass) { return }
+        const { total } = sign
+        // 获取奖励列表信息
+        const award = await getSignAwards(total)
+        if (!award.isPass) { return }
+        const { name, count, icon } = award
+        // 签到操作
+        const success = await postSign(game_uid, region, nickname, name, count)
+        if (success.isPass) { 
+            $.msg(NOTI_TITLE, '', format('亲爱的{0}, 派蒙已经偷偷替你签到并领取了奖励({1}x{2}).', nickname, name, count), {
+                'media-url': icon
+            })
         }
     } catch (error) {
-        $.msg(NOTI_TITLE, '', `错误: ${error.message || error}`, { 'media-url': 'https://img-static.mihoyo.com/communityweb/upload/70b5b0c9543ee5080c6ae92fd2797892.png' })
+        notify(notifition.other, error.message || error)
     } finally {
         $.done()
     }
@@ -98,10 +140,28 @@ function getUserInfo() {
     }
     return $.http.get(option).then(res => {
         const { retcode, message, data } = JSON.parse(res.body)
-        return {
-            retcode,
-            message,
-            role: data.list[0]
+        if (checkStatusIfError(retcode)) {
+            notify(notifition.user, message)
+            return { isPass: false }
+        }
+        const role = data?.list[0]
+        if (!role) {
+            notify(notifition.uid)
+            return { isPass: false }
+        }
+        // 取出必要数据
+        const { game_uid, region, nickname } = role
+        if (game_uid && region && nickname) {
+            return {
+                isPass: true,
+                game_uid,
+                region,
+                nickname
+            }
+        } else {
+            // 无法获取到正确的 uid, region, nickname
+            notify(notifition.uid)
+            return { isPass: false }
         }
     })
 }
@@ -114,12 +174,57 @@ function getSignInfo(game_uid, region) {
     }
     return $.http.get(option).then(res => {
         const { retcode, message, data } = JSON.parse(res.body)
+        if (checkStatusIfError(retcode)) {
+            notify(notifition.sign, message)
+            return { isPass: false }
+        }
+        if (!data) {
+            notify(notifition.today)
+            return { isPass: false }
+        }
+        const { total_sign_day, first_bind, is_sign } = data
+        // 未绑定
+        if (first_bind) {
+            notify(notifition.bind)
+            return { isPass: false }
+        }
+        // 已签到
+        if (is_sign) {
+            notify(notifition.signed)
+            return { isPass: false }
+        }
+
         return {
-            retcode,
-            message,
-            today: data.today,
-            first_bind: data.first_bind,
-            is_sign: data.is_sign
+            isPass: true,
+            total: total_sign_day
+        }
+    })
+}
+
+// 获取签到奖励信息
+function getSignAwards(total) {
+    const option = {
+        url: format(GET_SIGN_AWARDS, ACT_ID),
+        headers: getHeaders()
+    }
+    return $.http.get(option).then(res => {
+        const { retcode, message, data } = JSON.parse(res.body)
+        if (checkStatusIfError(retcode)) {
+            notify(notifition.awards)
+            return { isPass: false }
+        }
+        const award = data?.awards[total]
+        if (award) {
+            const { name, cnt, icon } = award
+            return {
+                isPass: true,
+                name,
+                count: cnt,
+                icon
+            }
+        } else {
+            notify(notifition.awards)
+            return { isPass: false }
         }
     })
 }
@@ -138,14 +243,25 @@ function postSign(game_uid, region) {
     }
     return $.http.post(option).then(res => {
         const { retcode, message } = JSON.parse(res.body)
-        return {
-            retcode,
-            message
+        if (checkStatusIfError(retcode)) {
+            notify(notifition.error, message)
+            return { isPass: false }
         }
+        return { isPass: true }
     })
 }
 
 //============== 辅助函数 ==========================
+
+// 请求接口状态判断
+function checkStatusIfError(code) {
+    return code !== 0
+}
+
+// 调用通知
+function notify(notifition, ...args) {
+    $.msg(NOTI_TITLE, '', format(notifition.message, args), notifition.option)
+}
 
 // 格式化字符串
 function format(string, ...args) {
