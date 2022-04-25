@@ -1,11 +1,11 @@
 /**
  * @name 米游社原神自动签到-qx
- * @version v1.1.0
+ * @version v1.1.1
  * @description 摆脱米游社和健忘症, 每天定时自动签到, 6w 摩拉和一些垃圾还是香的.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/
- * @thanks chavyleung, qx 脚本官方函数的二次封装
- * @thanks NobyDa, qx 脚本的语法参考和一些原生算法解决方案参考
+ * @thanks chavyleung, 各家应用环境的统一封装
+ * @thanks NobyDa, 一些原生算法解决方案参考
  * @thanks https://github.com/daye99/genshin-sign-helper, 业务逻辑部分基本来自该仓库, 而该仓库代码又参考了别的仓库, 套娃式, 详情可以去原仓库查找
  * @thanks https://github.com/Azure99/GenshinPlayerQuery/issues/20 关键算法逻辑部分的来源
  */
@@ -27,58 +27,31 @@ const ACT_ID = 'e202009291139501'
 /**
  * 通知相关
  */
-const errorImg = { 
+
+// cookie 获取教程的 url
+const openOpt = {
+    'open-url': 'https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/'
+}
+// 报错的图片
+const errorOpt = { 
     'media-url': 'https://img-static.mihoyo.com/communityweb/upload/4a102d21856350263e83278ac8c48526.png' 
 }
-
-const signedImg = {
+// 已签到的图片
+const signedOpt = {
     'media-url': 'https://img-static.mihoyo.com/communityweb/upload/2906e8f5c1c1cc83ef5832167022c679.png'
 }
-
-const notifition = {
-    cookie: {
-        message: `请在脚本中 $.cookie = '' 单引号内填入米游社 Cookie. 点击该通知将跳转获取米游社 Cookie 的教程页面.`,
-        option: {
-            'open-url': 'https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/',
-            ...errorImg
-        }
-    },
-    user: {
-        message: '获取账号信息有误, 错误信息: {0}',
-        option: errorImg
-    },
-    uid: {
-        message: '无法正确获取账号信息关键参数',
-        option: errorImg
-    },
-    sign: {
-        message: '获取账号签到信息有误, 错误信息: {0}',
-        option: errorImg
-    },
-    today: {
-        message: '无法正确获取账号签到信息关键参数',
-        option: errorImg
-    },
-    awards: {
-        message: '获取签到奖励信息有误, 错误信息: {0}',
-        option: errorImg
-    },
-    bind: {
-        message: '请先前往米游社 App 手动签到一次!',
-        option: errorImg
-    },
-    signed: {
-        message: '喂!派蒙今天已经替你签到并领取了奖励, 你不要得寸进尺呀!',
-        option: signedImg
-    },
-    error: {
-        message: '签到操作未成功, 错误信息: {0}',
-        option: errorImg
-    },
-    other: {
-        message: '错误: {0}',
-        option: errorImg
-    }
+// 错误信息统一处理
+const errorMessage = {
+    cookie: `请在脚本中 $.cookie = '' 单引号内填入米游社 Cookie. 点击该通知将跳转获取米游社 Cookie 的教程页面.`,
+    user: '获取账号信息有误, 错误信息: {0}',
+    uid: '无法正确获取账号信息关键参数',
+    sign: '获取账号签到信息有误, 错误信息: {0}',
+    today: '无法正确获取账号签到信息关键参数',
+    awards: '获取签到奖励信息有误, 错误信息: {0}',
+    award: '无法正确获取签到奖励信息关键参数',
+    bind: '请先前往米游社 App 手动签到一次!',
+    signed: '喂!派蒙今天已经替你签到并领取了奖励, 你不要得寸进尺呀!',
+    error: '签到操作未成功, 错误信息: {0}'
 }
 
 /**
@@ -103,30 +76,22 @@ async function main() {
     try {
         // 先验证 cookie 是否已填写
         if ($.cookie === '') {
-            notify(notifition.cookie)
+            notify(errorMessage.cookie, { ...openOpt, ...errorOpt })
             return
         }
         // 获取 cookie 所属的账号信息
-        const user = await getUserInfo()
-        if (!user.isPass) { return }
-        const { game_uid, region, nickname } = user
-        // 获取账号签到信息
-        const sign = await getSignInfo(game_uid, region)
-        if (!sign.isPass) { return }
-        const { total } = sign
+        const { game_uid, region, nickname } = await getUserInfo()
+        // 获取账号签到信息 (签到次数)
+        const total = await getSignInfo(game_uid, region)
         // 获取奖励列表信息
-        const award = await getSignAwards(total)
-        if (!award.isPass) { return }
-        const { name, count, icon } = award
+        const { name, count, icon } = await getSignAwards(total)
         // 签到操作
-        const success = await postSign(game_uid, region, nickname, name, count)
-        if (success.isPass) { 
-            $.msg(NOTI_TITLE, '', format('亲爱的{0}, 派蒙已经偷偷替你签到并领取了奖励({1}x{2}).', nickname, name, count), {
-                'media-url': icon
-            })
-        }
+        await postSign(game_uid, region, nickname, name, count)
+        notify(String.format('亲爱的{0}, 派蒙已经偷偷替你签到并领取了奖励({1}x{2}).', nickname, name, count), {
+            'media-url': icon
+        })
     } catch (error) {
-        notify(notifition.other, error.message || error)
+        notify(error.message || error, errorOpt)
     } finally {
         $.done()
     }
@@ -140,28 +105,22 @@ function getUserInfo() {
     }
     return $.http.get(option).then(res => {
         const { retcode, message, data } = JSON.parse(res.body)
-        if (checkStatusIfError(retcode)) {
-            notify(notifition.user, message)
-            return { isPass: false }
+        if (retcode !== 0) {
+            return Promise.reject(new Error(String.format(errorMessage.user, message)))
         }
-        const role = data?.list[0]
-        if (!role) {
-            notify(notifition.uid)
-            return { isPass: false }
-        }
+        const game_uid = data?.list?.[0]?.game_uid
+        const region = data?.list?.[0]?.region
+        const nickname = data?.list?.[0]?.nickname
         // 取出必要数据
-        const { game_uid, region, nickname } = role
         if (game_uid && region && nickname) {
             return {
-                isPass: true,
                 game_uid,
                 region,
                 nickname
             }
         } else {
             // 无法获取到正确的 uid, region, nickname
-            notify(notifition.uid)
-            return { isPass: false }
+            return Promise.reject(new Error(errorMessage.uid))
         }
     })
 }
@@ -169,34 +128,30 @@ function getUserInfo() {
 // 获取账号签到信息
 function getSignInfo(game_uid, region) {
     const option = {
-        url: format(GET_SIGN_INFO, region, ACT_ID, game_uid),
+        url: String.format(GET_SIGN_INFO, region, ACT_ID, game_uid),
         headers: getHeaders()
     }
     return $.http.get(option).then(res => {
         const { retcode, message, data } = JSON.parse(res.body)
-        if (checkStatusIfError(retcode)) {
-            notify(notifition.sign, message)
-            return { isPass: false }
+        if (retcode !== 0) {
+            return Promise.reject(new Error(String.format(errorMessage.sign, message)))
         }
-        if (!data) {
-            notify(notifition.today)
-            return { isPass: false }
-        }
-        const { total_sign_day, first_bind, is_sign } = data
-        // 未绑定
-        if (first_bind) {
-            notify(notifition.bind)
-            return { isPass: false }
-        }
-        // 已签到
-        if (is_sign) {
-            notify(notifition.signed)
-            return { isPass: false }
-        }
-
-        return {
-            isPass: true,
-            total: total_sign_day
+        const total_sign_day = data?.['total_sign_day']
+        const first_bind = data?.['first_bind']
+        const is_sign = data?.['is_sign']
+        if (total_sign_day && first_bind !== undefined && is_sign !== undefined) {
+            // 未绑定
+            if (first_bind) {
+                return Promise.reject(new Error(errorMessage.bind))
+            }
+            // 已签到
+            if (is_sign) {
+                return Promise.reject(new Error(errorMessage.signed))
+            }
+            // 返回总签到次数
+            return total_sign_day
+        } else {
+            return Promise.reject(new Error(errorMessage.today))
         }
     })
 }
@@ -204,27 +159,25 @@ function getSignInfo(game_uid, region) {
 // 获取签到奖励信息
 function getSignAwards(total) {
     const option = {
-        url: format(GET_SIGN_AWARDS, ACT_ID),
+        url: String.format(GET_SIGN_AWARDS, ACT_ID),
         headers: getHeaders()
     }
     return $.http.get(option).then(res => {
         const { retcode, message, data } = JSON.parse(res.body)
-        if (checkStatusIfError(retcode)) {
-            notify(notifition.awards)
-            return { isPass: false }
+        if (retcode !== 0) {
+            return Promise.reject(new Error(String.format(errorMessage.awards, message)))
         }
-        const award = data?.awards[total]
-        if (award) {
-            const { name, cnt, icon } = award
+        const name = data?.awards?.[total]?.name
+        const cnt = data?.awards?.[total]?.cnt
+        const icon = data?.awards?.[total]?.icon
+        if (name && cnt && icon) {
             return {
-                isPass: true,
                 name,
                 count: cnt,
                 icon
             }
         } else {
-            notify(notifition.awards)
-            return { isPass: false }
+            return Promise.reject(new Error(errorMessage.award))
         }
     })
 }
@@ -243,33 +196,17 @@ function postSign(game_uid, region) {
     }
     return $.http.post(option).then(res => {
         const { retcode, message } = JSON.parse(res.body)
-        if (checkStatusIfError(retcode)) {
-            notify(notifition.error, message)
-            return { isPass: false }
+        if (retcode !== 0) {
+            return Promise.reject(new Error(String.format(errorMessage.error, message)))
         }
-        return { isPass: true }
     })
 }
 
 //============== 辅助函数 ==========================
 
-// 请求接口状态判断
-function checkStatusIfError(code) {
-    return code !== 0
-}
-
-// 调用通知
-function notify(notifition, ...args) {
-    $.msg(NOTI_TITLE, '', format(notifition.message, args), notifition.option)
-}
-
-// 格式化字符串
-function format(string, ...args) {
-    let formatted = string
-    for(let i = 0; i < args.length; i++) {
-        formatted = formatted.replace('{' + i + '}', args[i])
-    }
-    return formatted
+// 调用系统通知
+function notify(message, option) {
+    $.msg(NOTI_TITLE, '', message, option)
 }
 
 // 米游社 api headers
@@ -309,6 +246,17 @@ function getRandomString(count) {
     let n = ''
     for (var i = 0; i < count; i++) n += d.charAt(Math.floor(Math.random() * t))
     return n
+}
+
+//============= 类与原型上添加方法 ======================
+
+// 格式化字符串
+String.format = function(string, ...args) {
+    let formatted = string
+    for(let i = 0; i < args.length; i++) {
+        formatted = formatted.replace('{' + i + '}', args[i])
+    }
+    return formatted
 }
 
 //============== 第三方辅助函数 =========================
