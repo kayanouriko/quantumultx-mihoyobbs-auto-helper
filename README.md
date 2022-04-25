@@ -10,12 +10,14 @@
 
 使用脚本前, 你需要提前了解如何使用 quantumultx 创建一个脚本任务.
 
-虽然是参照 Quantumult X 编写, 但是使用的模块封装应该也适配 Shadowrocket, Loon, Surge, Stash. 
+虽然是参照 quantumultx 编写, 但是使用的模块封装应该也适配 shadowrocket, loon, surge, stash. 
 
 别家应用的用户可以自行测试一下, 行就行, 不行也别找我了Orz
 
 ## 更新日志
 
+* v1.1.1
+    1. 优化代码逻辑
 * v1.1.0 
     1. 新增签到奖励信息
     2. 优化代码逻辑
@@ -26,10 +28,10 @@
 
 1. 获取 cookie (感谢: [@Finger36](https://github.com/Finger36/genshin-helper))
     1. 打开你的浏览器,进入**无痕/隐身模式**
-    2. 由于米哈游修改了bbs可以获取的Cookie，导致一次获取的Cookie缺失，所以需要增加步骤
+    2. 由于米哈游修改了 bbs 可以获取的 cookie，导致一次获取的 cookie 缺失，所以需要增加步骤
     3. 打开 http://bbs.mihoyo.com/ys 并进行登入操作
     4. 在上一步登入完成后新建标签页，打开 http://user.mihoyo.com 并进行登入操作
-    5. 按下键盘上的F12或右键检查,打开开发者工具,点击Console
+    5. 按下键盘上的 F12 或右键检查,打开开发者工具,点击 Console
     6. 复制以下代码并回车
     ```javascript
     var cookie = document.cookie
