@@ -13,6 +13,19 @@ const $ = new Env('米游社小助手-cookie')
 
 const CONFIG_KEY = 'kayanouriko_mihoyobbs_config'
 
+const tasksDic = {
+    1: '米游币任务',
+    2: '原神签到任务',
+    3: '崩坏3rd签到任务'
+}
+
+const actionsDic = {
+    58: '讨论区签到任务',
+    59: '浏览 3 个帖子任务',
+    60: '完成 5 次点赞任务',
+    61: '分享帖子任务',
+}
+
 /** 主入口 */
 main()
 
@@ -30,9 +43,25 @@ function main() {
             actions
         }
     }
+    // 整理通知文本
+    let tasksResult = '执行'
+    for (const id of tasks) {
+        tasksResult += `"${tasksDic[id]}"` 
+    }
+    
+    const micoinID = tasks.find(e => e === 1)
+    if (micoinID) {
+        tasksResult += `, 其中"米游币任务"将执行`
+        for (const id of actions) {
+            tasksResult += `"${actionsDic[id]}"` 
+        }
+    }
+    tasksResult += '.'
+    
+    const result = `米游社小助手自定义设置成功! 长按通知展开配置或者点击通知在应用内查看配置.\n\n${tasksResult}`
     
     if ($.setdata(JSON.stringify(config), CONFIG_KEY)) {
-        $.msg('米游社小助手-设置', `米游社小助手脚本自定义配置设定成功! ${JSON.stringify(config)}`)
+        $.msg('米游社小助手-设置', result)
     }
     // 传入空对象不改变原来的请求
     $.done({})
