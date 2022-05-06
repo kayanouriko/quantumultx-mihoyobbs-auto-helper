@@ -3,7 +3,7 @@
 
 ## 简介
 
-一个 quantumultx 脚本, 主要用于米游社原神每日签到的自动运行.
+一个 quantumultx 脚本, 主要用于米游社米游币任务和游戏签到的自动运行.
 
 ![platform](https://img.shields.io/badge/platform-quantumultx-lightgrey.svg) [![](https://img.shields.io/github/v/release/kayanouriko/quantumultx-genshin-autosign-helper)](https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/releases)
 
