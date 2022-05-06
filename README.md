@@ -3,15 +3,13 @@
 
 ![platform](https://img.shields.io/badge/platform-quantumultx-lightgrey.svg) [![](https://img.shields.io/github/v/release/kayanouriko/quantumultx-genshin-autosign-helper)](https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/releases)
 
-## 简介
-
 一个 quantumultx 脚本, 主要用于米游社米游币任务和游戏签到的自动运行.
 
 ## 前言
 
 该脚本只适配了国服账号.
 
-使用脚本前, 你需要提前了解如何使用 quantumultx 创建一个脚本任务.
+使用该项目之前, 你需要提前了解如何使用 quantumultx 拉取远程仓库和执行脚本.
 
 虽然是参照 quantumultx 编写, 但是使用的模块封装应该也适配 shadowrocket, loon, surge, stash. 
 
