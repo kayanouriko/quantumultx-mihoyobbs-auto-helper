@@ -38,16 +38,16 @@ v2.0.0开始, 在 quantumultx 中全面转为远程更新和执行, 配置一次
 
 1. 获取重写配置文件
 
-|![](./assets/rewrite-1.PNG)|
-|:--:|
+|   ![](./assets/rewrite-1.PNG)   |
+| :-----------------------------: |
 | 打开设置-重写-引用<br>rewrite-1 |
 
-|![](./assets/rewrite-2.PNG)|
-|:--:|
+|   ![](./assets/rewrite-2.PNG)   |
+| :-----------------------------: |
 | 点击右上角添加连接<br>rewrite-2 |
 
-|![](./assets/rewrite-3.PNG)|
-|:--:|
+|                  ![](./assets/rewrite-3.PNG)                  |
+| :-----------------------------------------------------------: |
 | 写入远程重写配置文件连接和标签名, 点击右上角保存<br>rewrite-3 |
 
 ```
@@ -57,16 +57,16 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 
 2. 获取任务脚本仓库和脚本
 
-|![](./assets/task-1.PNG)|
-|:--:|
+|     ![](./assets/task-1.PNG)     |
+| :------------------------------: |
 | 打开应用底部最右侧图标<br>task-1 |
 
-|![](./assets/task-2.PNG)|
-|:--:|
-| 点击红框图标<br>task-2 |
+| ![](./assets/task-2.PNG) |
+| :----------------------: |
+|  点击红框图标<br>task-2  |
 
-|![](./assets/task-3.PNG)|
-|:--:|
+|        ![](./assets/task-3.PNG)        |
+| :------------------------------------: |
 | 点击右上角加号, 输入仓库地址<br>task-3 |
 
 ```
@@ -74,46 +74,46 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/main/gallery/gallery.json
 ```
 
-|![](./assets/task-4.PNG)|
-|:--:|
+|         ![](./assets/task-4.PNG)         |
+| :--------------------------------------: |
 | 点击米游社小助手任务添加到本地<br>task-4 |
 
-|![](./assets/task-5.PNG)|
-|:--:|
+|        ![](./assets/task-5.PNG)        |
+| :------------------------------------: |
 | 请求列表如图所示即为添加成功<br>task-5 |
 
 ### 获取 cookie
 
-|![](./assets/rewrite-5.PNG)|
-|:--:|
+|      ![](./assets/rewrite-5.PNG)      |
+| :-----------------------------------: |
 | 保证重写列表的为打开状态<br>rewrite-5 |
 
 打开米游社 app, 此时会弹出第一条获取成功的通知, 再随便打开一个游戏的签到页面, 会收到第二条获取成功的通知. 如下所示
 
-|![](./assets/rewrite-4.PNG)|
-|:--:|
+|       ![](./assets/rewrite-4.PNG)       |
+| :-------------------------------------: |
 | 获取 cookie 成功的两条通知<br>rewrite-4 |
 
 关闭重写列表, 以后 cookie 失效了再重新打开重复以上步骤重新获取 cookie 即可.
 
-|![](./assets/rewrite-2.PNG)|
-|:--:|
-| 点击右上角添加连接<br>rewrite-2 |
+| ![](./assets/rewrite-2.PNG) |
+| :-------------------------: |
+|  取消打勾操作<br>rewrite-2  |
 
 ### 至此, 脚本可以运行了.
 
 ### 进阶用法(自定义配置)
 
-| 参数名 | 说明 | 值 |
-| :--: | :--: | :--: |
-| tasks | 需要自动执行的任务 | 1. 米游币任务 2. 原神签到 3. 崩坏 3rd 签到. <br>默认为 1,2,3 执行米游币, 原神, 崩坏3rd 3个任务 |
+|  参数名  |            说明            |                                                              值                                                               |
+| :------: | :------------------------: | :---------------------------------------------------------------------------------------------------------------------------: |
+|  tasks   |     需要自动执行的任务     |                1. 米游币任务 2. 原神签到 3. 崩坏 3rd 签到. <br>默认为 1,2,3 执行米游币, 原神, 崩坏3rd 3个任务                 |
 | scetions | 需要执行米游币任务的讨论区 | 1. 崩坏3, 26. 原神 30. 崩坏学园2 37. 未定事件簿 34. 大别野 52. 崩坏：星穹铁道 <br>默认为 34, 即在大别野帖子列表执行米游币任务 |
-| actions | 需要执行的米游币任务 | 58. 讨论区签到 59. 浏览 3 个帖子 60. 完成 5 次点赞 61. 分享帖子 <br>默认为 58,59,60,61 执行米游社的全部任务 |
+| actions  |    需要执行的米游币任务    |          58. 讨论区签到 59. 浏览 3 个帖子 60. 完成 5 次点赞 61. 分享帖子 <br>默认为 58,59,60,61 执行米游社的全部任务          |
 
 #### 自定义配置使用方法
 
-|![](./assets/rewrite-5.PNG)|
-|:--:|
+|      ![](./assets/rewrite-5.PNG)      |
+| :-----------------------------------: |
 | 保证重写列表的为打开状态<br>rewrite-5 |
 
 打开 safari 浏览器, 访问 `https://example.com/?参数名=值` 即可, 弹出设置成功的通知即为成功.
@@ -123,6 +123,12 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 * 注2: 关于链接 GET 请求传参的相关知识请参考: [Query String](https://en.wikipedia.org/wiki/Query_string)
 
 例如: `https://example.com/?tasks=1,2&actions=58,59` 表示脚本执行 米游币任务 原神签到任务, 并且米游币任务中执行讨论区签到, 浏览 3 个帖子两个任务.
+
+关闭重写列表, 以后想要重新自定义配置项重复上述步骤即可.
+
+| ![](./assets/rewrite-2.PNG) |
+| :-------------------------: |
+|  取消打勾操作<br>rewrite-2  |
 
 ## 如何使用(1.x)
 
@@ -157,5 +163,6 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 
 * [@chavyleung/Env.js](https://github.com/chavyleung/scripts): 各家应用环境的统一封装
 * [@NobyDa](https://github.com/NobyDa/Script): 一些原生算法解决方案参考
-* [@genshin-sign-helper](https://github.com/daye99/genshin-sign-helper): 业务逻辑部分基本来自该仓库, 而该仓库代码又参考了别的仓库, 套娃式, 详情可以去原仓库查找
+* [@AutoMihoyoBBS](https://github.com/Womsxd/AutoMihoyoBBS): v2版本业务逻辑部分基本来自该仓库
+* [@genshin-sign-helper](https://github.com/daye99/genshin-sign-helper): v1版本业务逻辑部分基本来自该仓库
 * [@GenshinPlayerQuery](https://github.com/Azure99/GenshinPlayerQuery/issues/20): 关键算法逻辑部分的来源
