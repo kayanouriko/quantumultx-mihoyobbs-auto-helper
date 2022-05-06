@@ -3,7 +3,7 @@
  * @version v1.0.0
  * @description 用于获取米游币任务和签到任务的 cookie
  * @author kayanouriko
- * @homepage https://github.com/kayanouriko/quantumultx-genshin-autosign-helper
+ * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
  * @thanks chavyleung, 各家应用环境的统一封装
  * @thanks NobyDa, 一些原生算法解决方案参考
  * @license MIT
@@ -18,8 +18,8 @@ const LOGIN_TICKET = 'login_ticket'
 const ACCOUNT_ID = 'account_id'
 const COOKIE_TOKEN = 'cookie_token'
 /** 存储的 key */
-const BBS_COOKIE_KEY = 'kayanouriko_cookie_bss'
-const SIGN_COOKIE_KEY = 'kayanouriko_cookie_sign'
+const BBS_COOKIE_KEY = 'kayanouriko_mihoyobbs_cookie_bbs'
+const SIGN_COOKIE_KEY = 'kayanouriko_mihoyobbs_cookie_sign'
 
 /** 主入口 */
 main()
