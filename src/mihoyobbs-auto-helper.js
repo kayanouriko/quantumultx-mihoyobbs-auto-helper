@@ -1,6 +1,6 @@
 /**
  * @name 米游社小助手
- * @version v2.0.0
+ * @version v2.0.1
  * @description 摆脱米游社 每天定时自动执行相关任务.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
@@ -22,8 +22,7 @@ const msgOpt = {
     cookie: {
         'open-url': 'https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper'
     },
-    error: {},
-    success: {}
+    normal: {},
 }
 // 文本信息
 const msgText = {
@@ -59,14 +58,11 @@ const msgText = {
         signError: '讨论区签到任务执行失败, 错误信息: {0}.\n',
         sign: '讨论区签到任务完成(米游币+30).\n',
         post: '浏览 3 个帖子任务完成(米游币+20).\n',
-        postOne: '浏览了 "{0}" 帖子.\n',
         postFail: '浏览 3 个帖子任务未完成, 只成功浏览了 {0} 个帖子.\n',
         vote: '5 次点赞任务完成(米游币+30).\n',
-        voteOne: '点赞了 "{0}" 帖子.\n',
         voteFail: '5 次点赞任务未完成, 只成功点赞了 {0} 个帖子.\n',
         shared: '分享帖子任务完成(米游币+10).\n',
-        sharedOne: '分享了 "{0}" 帖子.\n',
-        sharedFail: '分享帖子任务未完成, 错误信息: {0}.\n',
+        sharedFail: '分享帖子任务未完成.\n',
         taskEmpty: '不过貌似没有任何米游币任务执行了Orz\n',
         success: '米游币任务操作完成!\n{0}\n',
         error: '米游币任务操作未完成!\n{0}\n\n'
@@ -254,9 +250,9 @@ async function main() {
         } else {
             results += msgText.noti.resultsEnd
         }
-        notify(results, msgOpt.success)
+        notify(results, msgOpt.normal)
     } catch (error) {
-        const option = error === msgText.cookie.empty ? msgOpt.cookie : msgOpt.error
+        const option = error === msgText.cookie.empty ? msgOpt.cookie : msgOpt.normal
         notify(error.message || error, option)
     } finally {
         $.done()
@@ -309,42 +305,31 @@ async function micoinTask() {
                 case 59:
                     // 看帖子
                     let postCount = task.times
-                    let postResult = ''
                     for (let i = task.times; i < 3; i++) {
-                        const retcode = await getPostFull(lists?.[i])
-                        postCount += retcode
-                        if (retcode) {
-                            postResult += String.format(msgText.micoin.postOne, lists?.[i]?.post?.['subject'] ?? '未知帖子')
-                        }
+                        postCount += await getPostFull(lists?.[i])
                         await randomSleepAsync()
                     }
-                    postResult += postCount === 3 ? msgText.micoin.post : String.format(msgText.micoin.postFail, postCount)
-                    results += postResult
+                    results += postCount === 3 ? msgText.micoin.post : String.format(msgText.micoin.postFail, postCount)
                     break
                 case 60:
                     // 帖子点赞
                     let voteCount = task.times
-                    let voteResult = ''
                     for (let i = task.times; i < 5; i++) {
-                        const retcode = await postUpVotePost(lists?.[i])
-                        voteCount += retcode
-                        if (retcode) {
-                            voteResult += String.format(msgText.micoin.voteOne, lists?.[i]?.post?.['subject'] ?? '未知帖子')
-                        }
+                        voteCount += await postUpVotePost(lists?.[i])
                         await randomSleepAsync()
-                    } 
-                    voteResult += voteCount === 5 ? msgText.micoin.vote : String.format(msgText.micoin.voteFail, voteCount)
-                    results += voteResult
+                    }
+                    results += voteCount === 5 ? msgText.micoin.vote : String.format(msgText.micoin.voteFail, voteCount)
                     break
                 case 61:
                     // 分享
                     let sharedResult = ''
-                    const { retcode, sharedMessage } = await getShareConf(lists?.[0])
-                    sharedResult += sharedMessage
-                    if (retcode === 0) {
-                        sharedResult += msgText.micoin.shared
+                    const sharedCode = await getShareConf(lists?.[0])
+                    if (sharedCode === 0) {
+                        sharedResult = msgText.micoin.shared
+                    } else {
+                        sharedResult = msgText.micoin.sharedFail
                     }
-                    results == sharedResult
+                    results += sharedResult
                     await randomSleepAsync()
                     break
                 default:
@@ -488,21 +473,15 @@ function getShareConf(post) {
     const postid = post?.post?.['post_id']
     const subject = post?.post?.['subject'] ?? '未知帖子'
     if (!postid) { 
-        return {
-            retcode: 1,
-            result: String.format(msgText.micoin.sharedFail, '获取帖子出现错误')
-        }
+        return 0
     }
     const option = {
         url: String.format(api.micoin.getShareConf, postid),
         headers: getBBSHeaders()
     }
     return $.http.get(option).then(res => {
-        const { retcode, message } = JSON.parse(res.body)
-        return {
-            retcode,
-            sharedMessage: retcode === 0 ? String.format(msgText.micoin.sharedOne, subject) : String.format(msgText.micoin.sharedFail, message)
-        }
+        const { retcode } = JSON.parse(res.body)
+        return retcode === 0 ? 1 : 0
     })
 }
 
