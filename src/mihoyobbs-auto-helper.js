@@ -322,13 +322,8 @@ async function micoinTask() {
                     break
                 case 61:
                     // 分享
-                    let sharedResult = ''
                     const sharedCode = await getShareConf(lists?.[0])
-                    if (sharedCode === 0) {
-                        sharedResult = msgText.micoin.shared
-                    } else {
-                        sharedResult = msgText.micoin.sharedFail
-                    }
+                    const sharedResult = sharedCode === 0 ? sharedResult = msgText.micoin.shared : sharedResult = msgText.micoin.sharedFail
                     results += sharedResult
                     await randomSleepAsync()
                     break
@@ -481,7 +476,7 @@ function getShareConf(post) {
     }
     return $.http.get(option).then(res => {
         const { retcode } = JSON.parse(res.body)
-        return retcode === 0 ? 1 : 0
+        return retcode
     })
 }
 
