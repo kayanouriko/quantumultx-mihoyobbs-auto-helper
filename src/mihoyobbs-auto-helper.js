@@ -1,6 +1,6 @@
 /**
  * @name 米游社小助手
- * @version v2.0.1
+ * @version v2.0.3
  * @description 摆脱米游社 每天定时自动执行相关任务.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
@@ -323,7 +323,7 @@ async function micoinTask() {
                 case 61:
                     // 分享
                     const sharedCode = await getShareConf(lists?.[0])
-                    const sharedResult = sharedCode === 0 ? sharedResult = msgText.micoin.shared : sharedResult = msgText.micoin.sharedFail
+                    const sharedResult = sharedCode === 0 ? msgText.micoin.shared : msgText.micoin.sharedFail
                     results += sharedResult
                     await randomSleepAsync()
                     break
@@ -418,10 +418,8 @@ function postSignIn(forumid) {
         url: String.format(api.micoin.postSignIn, forumid),
         headers: getBBSHeaders()
     }
-    $.log(JSON.stringify(option))
     return $.http.post(option).then(res => {
         const { retcode, message } = JSON.parse(res.body)
-        $.log(retcode, message)
         if (retcode !== 0) {
             // 签到操作未完成, 但是下面的任务还需要继续, 所以返回提示文本
             return String.format(msgText.micoin.signError, message)
