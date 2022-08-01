@@ -1,6 +1,6 @@
 /**
  * @name 米游社小助手
- * @version v2.0.3
+ * @version v2.1.0
  * @description 摆脱米游社 每天定时自动执行相关任务.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
@@ -76,7 +76,6 @@ const msgText = {
     },
     // 崩坏3rd签到相关
     honkai3rd: {
-        awards: '判断签到状态遇到未知错误.',
         signed: '舰长"{0}"今日已领取过奖励.',
         success: '崩坏3rd签到操作完成!\n舰长"{0}"领取了奖励({1}x{2}).\n\n',
         error: '崩坏3rd签到操作未完成!\n{0}\n\n'
@@ -95,11 +94,11 @@ const boards = {
         forumid: 1,
         key: 'honkai3rd',
         biz: 'bh3_cn',
-        actid: 'ea20211026151532',
+        actid: 'e202207181446311',
         name: '崩坏3rd',
         url: "https://bbs.mihoyo.com/bh3/",
         getReferer() {
-            return `https://webstatic.mihoyo.com/bh3/event/euthenia/index.html?bbs_presentation_style=fullscreen&bbs_game_role_required=${this.biz}&bbs_auth_required=true&act_id=${this.actid}&utm_source=bbs&utm_medium=mys&utm_campaign=icon`
+            return `https://webstatic.mihoyo.com/bbs/event/signin/bh3/index.html?bbs_auth_required=true&act_id=${this.actid}&bbs_presentation_style=fullscreen&utm_source=bbs&utm_medium=mys&utm_campaign=icon`
         }
     },
     genshin: {
@@ -167,10 +166,12 @@ const api = {
         postSign: 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/sign'
     },
     honkai3rd: {
-        // 签到状态 / 奖励详细
-        getSignInfo: 'https://api-takumi.mihoyo.com/common/eutheniav2/index?region={0}&act_id={1}&uid={2}',
+        // 签到状态
+        getSignInfo: 'https://api-takumi.mihoyo.com/event/luna/info?lang=zh-cn&region={0}&act_id={1}&uid={2}',
+        // 奖励信息
+        getSignAwards: 'https://api-takumi.mihoyo.com/event/luna/home?lang=zh-cn&act_id={0}',
         // 签到操作
-        postSign: 'https://api-takumi.mihoyo.com/common/eutheniav2/sign'
+        postSign: 'https://api-takumi.mihoyo.com/event/luna/sign'
     },
     getApi(type) {
         return this[type]
@@ -228,7 +229,6 @@ async function main() {
                     await checkBBSCookie()
                     const micoinResult = await micoinTask()
                     results += micoinResult
-                    
                     break
                 case 2:
                     await checkSignCookie()
@@ -560,8 +560,10 @@ async function honkai3rdSignTask() {
     try {
         // 获取账号信息
         const { game_uid, region, nickname } = await getUserInfo(boards.honkai3rd)
-        // 获取签到信息和奖励信息
-        const { name, count } = await getHonkai3rdSignInfo(game_uid, region, nickname)
+        // 获取签到信息
+        const total = await getHonkai3rdSignInfo(game_uid, region, nickname)
+        // 获取奖励信息
+        const { name, count } = await getHonkai3rdSignAwards(total)
         // 签到操作
         await postSign(boards.honkai3rd, game_uid, region)
         return Promise.resolve(String.format(msgText.honkai3rd.success, nickname, name, count))
@@ -570,7 +572,7 @@ async function honkai3rdSignTask() {
     }
 }
 
-// 获取签到状态和奖励信息
+// 获取签到状态
 function getHonkai3rdSignInfo(game_uid, region, nickname) {
     const option = {
         url: String.format(api.honkai3rd.getSignInfo, region, boards.honkai3rd.actid, game_uid),
@@ -581,37 +583,40 @@ function getHonkai3rdSignInfo(game_uid, region, nickname) {
         if (retcode !== 0) {
             return Promise.reject(String.format(msgText.common.sign, message))
         }
-        const list = data?.sign?.list
-        const signCount = data?.sign?.['sign_cnt']
-        if (list && signCount !== undefined) {
-            const award = list?.[signCount]
-            const status = award?.status
-            // status 2 已签到, 1 未签到, 0 未到签到时间
-            if (status === 0) {
-                // 未到签到时间, 说明今天已签到, 当前奖励已经领取
-                return Promise.reject(String.format(msgText.honkai3rd.signed, nickname))
-            } else if (status === 1) {
-                // 未签到
-                const name = award?.name
-                const count = award?.cnt
-                if (name && count) {
-                    if (status === 2) {
-                        
-                    } else {
-                        return {
-                            name,
-                            count
-                        }
-                    }
-                } else {
-                    return Promise.reject(msgText.common.award)
-                }
-            } else {
-                // status 2 永远不会遇到, 遇到说明接口数据有变动
-                return Promise.reject(msgText.honkai3rd.awards)
-            }
+        const isSign = data?.['is_sign'] ?? false
+        if (isSign) {
+            // 已经签到完成
+            return Promise.reject(String.format(msgText.honkai3rd.signed, nickname))
+        }
+        const total = data?.['total_sign_day']
+        if (total !== undefined) {
+            return total
         } else {
             return Promise.reject(msgText.common.today)
+        }
+    })
+}
+
+// 获取奖励信息
+function getHonkai3rdSignAwards(total) {
+    const option = {
+        url: String.format(api.honkai3rd.getSignAwards, boards.honkai3rd.actid),
+        headers: getHeaders(boards.honkai3rd)
+    }
+    return $.http.get(option).then(res => {
+        const { retcode, message, data } = JSON.parse(res.body)
+        if (retcode !== 0) {
+            return Promise.reject(String.format(msgText.common.awards, message))
+        }
+        const name = data?.awards?.[total]?.name
+        const cnt = data?.awards?.[total]?.cnt
+        if (name && cnt) {
+            return {
+                name,
+                count: cnt
+            }
+        } else {
+            return Promise.reject(msgText.common.award)
         }
     })
 }
