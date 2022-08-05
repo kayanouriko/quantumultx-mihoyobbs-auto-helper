@@ -1,0 +1,10 @@
+{
+    "name": "米游社小助手",
+    "description": "米游社小助手的任务仓库 by kayanouriko",
+    "task": [
+        {
+            "config": "2 0 * * * https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/main/src/mihoyobbs-auto-helper.js, tag=米游社小助手, img-url=https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/main/assets/gallery-icon.png, enabled=false",
+            "addons": "https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/main/task/mihoyobbs.conf, tag=配置米游社小助手"
+        }
+    ]
+}
