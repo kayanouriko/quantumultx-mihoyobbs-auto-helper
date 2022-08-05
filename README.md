@@ -15,14 +15,15 @@
 
 4. 使用该项目之前, 你需要提前了解如何使用 quantumultx 拉取远程仓库和执行脚本.
 
-> 虽然是参照 quantumultx 编写, 但是使用的模块封装应该也适配 shadowrocket, loon, surge, stash. 
+    > 虽然是参照 quantumultx 编写, 但是使用的模块封装应该也适配 shadowrocket, loon, surge, stash. 
 
-> 别家应用的用户可以自行测试一下, 行就行, 不行也别找我了Orz
+    > 别家应用的用户可以自行测试一下, 行就行, 不行也别找我了Orz
 
 ## 更新日志
 * v2.2.0
     1. 更新 header 相关参数适配米游币新接口
     2. 更新图片资源
+    3. 更新了仓库内容, 将重写规则也加入仓库, 现在无需另外手动添加重写链接了.(有需要的童鞋可以删除原来的仓库链接和重写链接, 添加并使用新的仓库来下载重写规则, 方便以后更新)
 * v2.1.0
     1. 适配 崩坏3rd 签到新接口. [@接口改版抓包讨论](https://github.com/Womsxd/AutoMihoyoBBS/issues/151)
 * v2.0.3
@@ -52,27 +53,6 @@ v2.0.0开始, 在 quantumultx 中全面转为远程更新和执行, 配置一次
 
 ### 引入资源
 
-1. 获取重写配置文件
-
-|   ![](./assets/rewrite-1.PNG)   |
-| :-----------------------------: |
-| 打开设置-重写-引用<br>rewrite-1 |
-
-|   ![](./assets/rewrite-2.PNG)   |
-| :-----------------------------: |
-| 点击右上角添加连接<br>rewrite-2 |
-
-|                  ![](./assets/rewrite-3.PNG)                  |
-| :-----------------------------------------------------------: |
-| 写入远程重写配置文件连接和标签名, 点击右上角保存<br>rewrite-3 |
-
-```
-// 资源路径连接
-https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/main/conf/mihoyobbs.conf
-```
-
-2. 获取任务脚本仓库和脚本
-
 |     ![](./assets/task-1.PNG)     |
 | :------------------------------: |
 | 打开应用底部最右侧图标<br>task-1 |
@@ -87,28 +67,28 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 
 ```
 // 仓库地址连接
-https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/main/gallery/gallery.json
+https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/main/task/gallery.json
 ```
 
-|         ![](./assets/task-4.PNG)         |
-| :--------------------------------------: |
-| 点击米游社小助手任务添加到本地<br>task-4 |
+|                        ![](./assets/task-4.PNG)                         |
+| :---------------------------------------------------------------------: |
+| 点击米游社小助手, 在弹出的 sheet 中分别选择添加和添加附加组件<br>task-4 |
 
-|        ![](./assets/task-5.PNG)        |
-| :------------------------------------: |
-| 请求列表如图所示即为添加成功<br>task-5 |
+|  ![](./assets/task-5.PNG)<br>![](./assets/rewrite-1.PNG)   |
+| :--------------------------------------------------------: |
+| 请求列表和重写落标如图所示即为添加成功<br>task-5 rewrite-1 |
 
 ### 获取 cookie
 
-|      ![](./assets/rewrite-5.PNG)      |
+|      ![](./assets/rewrite-1.PNG)      |
 | :-----------------------------------: |
-| 保证重写列表的为打开状态<br>rewrite-5 |
+| 保证重写列表的为打开状态<br>rewrite-1 |
 
 打开米游社 app, 此时会弹出第一条获取成功的通知, 再随便打开一个游戏的签到页面, 会收到第二条获取成功的通知. 如下所示
 
-|       ![](./assets/rewrite-4.PNG)       |
+|       ![](./assets/rewrite-3.PNG)       |
 | :-------------------------------------: |
-| 获取 cookie 成功的两条通知<br>rewrite-4 |
+| 获取 cookie 成功的两条通知<br>rewrite-3 |
 
 关闭重写列表, 以后 cookie 失效了再重新打开重复以上步骤重新获取 cookie 即可.
 
@@ -128,9 +108,9 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 
 #### 自定义配置使用方法
 
-|      ![](./assets/rewrite-5.PNG)      |
+|      ![](./assets/rewrite-1.PNG)      |
 | :-----------------------------------: |
-| 保证重写列表的为打开状态<br>rewrite-5 |
+| 保证重写列表的为打开状态<br>rewrite-1 |
 
 打开 safari 浏览器, 访问 `https://example.com/?参数名=值` 即可, 弹出设置成功的通知即为成功.
 
