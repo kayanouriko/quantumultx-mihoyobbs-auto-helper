@@ -1,6 +1,6 @@
 /**
  * @name 米游社小助手
- * @version v2.1.0
+ * @version v2.2.0
  * @description 摆脱米游社 每天定时自动执行相关任务.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
@@ -715,15 +715,15 @@ function getHeaders(board) {
         'accept-language': 'zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6,en;q=0.5',
         'x-rpc-device_id': uuidv4().replace('-', '').toLocaleUpperCase(),
         'User-Agent':
-            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.3.0',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.34.1',
         Referer: board.getReferer(),
         Host: 'api-takumi.mihoyo.com',
         'x-rpc-channel': 'appstore',
-        'x-rpc-app_version': '2.3.0',
+        'x-rpc-app_version': '2.34.1',
         'x-requested-with': 'com.mihoyo.hyperion',
         'x-rpc-client_type': '5',
         'Content-Type': 'application/json;charset=UTF-8',
-        DS: getDS(),
+        DS: getDS('9nQiU3AV0rJSIBWgdynfoGMGKaklfbM7'),
         'Cookie': signCookie
     }
 }
@@ -734,27 +734,23 @@ function getBBSHeaders() {
         'accept-language': 'zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6,en;q=0.5',
         'x-rpc-device_id': uuidv4().replace('-', '').toLocaleUpperCase(),
         'User-Agent':
-            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.8.0',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.34.1',
         Referer: "https://app.mihoyo.com/",
         Host: 'bbs-api.mihoyo.com',
         'x-rpc-channel': 'appstore',
-        'x-rpc-app_version': '2.8.0',
+        'x-rpc-app_version': '2.34.1',
         'x-requested-with': 'com.mihoyo.hyperion',
-        // 这里比较坑, 注意和 ds 的计算联动, 暂时写死处理吧, 2 为 安卓, 5 为 web mobile, bbs 任务需要客户端
         'x-rpc-client_type': '2',
         'Content-Type': 'application/json;charset=UTF-8',
-        DS: getDS(false),
+        DS: getDS('z8DRIUjNDT7IT5IZXvrUAxyupA1peND9'),
         'Cookie': bbsCookie
     }
 }
 
 /** ds 获取 */
-function getDS(isWeb = true) {
-    // 根据 x-rpc-client_type 的不同用不同的 n, 5 为 web mobile, 2 为 安卓
-    let n = 'dmq2p7ka6nsu0d3ev6nex4k1ndzrnfiy'
-    if (isWeb) {
-        n = 'h8w582wxwgqvahcdkpvdhbh2w9casgfl'
-    }
+// 备注1: x-rpc-client_type 参数: 游戏签到是内嵌 webview 所以用 5 为 web mobile, 米游币为 api 请求 所以用 2 为 安卓
+// 备注2: salt 与 x-rpc-app_version 和 x-rpc-client_type 都是联动的
+function getDS(n) {
     const i = Math.floor(new Date().getTime() / 1000) + ''
     const r = getRandomString(6)
     const c = md5(`salt=${n}&t=${i}&r=${r}`)
