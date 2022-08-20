@@ -1,6 +1,6 @@
 /**
  * @name 米游社小助手
- * @version v2.2.0
+ * @version v2.3.0
  * @description 摆脱米游社 每天定时自动执行相关任务.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
@@ -148,7 +148,7 @@ const api = {
         // 获取对应版块的帖子列表
         getForumPostList: 'https://bbs-api.mihoyo.com/post/api/getForumPostList?forum_id={0}&is_good=false&is_hot=false&page_size=20&sort_type=1',
         // 讨论区签到
-        postSignIn: 'https://bbs-api.mihoyo.com/apihub/sapi/signIn?gids={0}',
+        postSignIn: 'https://bbs-api.mihoyo.com/apihub/app/api/signIn',
         // 浏览帖子
         getPostFull: 'https://bbs-api.mihoyo.com/post/api/getPostFull?post_id={0}',
         // 点赞
@@ -414,9 +414,13 @@ function getForumPostList(forumid) {
 
 // 讨论区签到
 function postSignIn(forumid) {
+    const json = {
+        'gids': forumid
+    }
     const option = {
-        url: String.format(api.micoin.postSignIn, forumid),
-        headers: getBBSHeaders()
+        url: api.micoin.postSignIn,
+        headers: getBBSHeaders(JSON.stringify(json)),
+        body: JSON.stringify(json)
     }
     return $.http.post(option).then(res => {
         const { retcode, message } = JSON.parse(res.body)
@@ -719,17 +723,17 @@ function getHeaders(board) {
         Referer: board.getReferer(),
         Host: 'api-takumi.mihoyo.com',
         'x-rpc-channel': 'appstore',
-        'x-rpc-app_version': '2.34.1',
+        'x-rpc-app_version': '2.35.2',
         'x-requested-with': 'com.mihoyo.hyperion',
         'x-rpc-client_type': '5',
         'Content-Type': 'application/json;charset=UTF-8',
-        DS: getDS('9nQiU3AV0rJSIBWgdynfoGMGKaklfbM7'),
+        DS: getDS('N50pqm7FSy2AkFz2B3TqtuZMJ5TOl3Ep'),
         'Cookie': signCookie
     }
 }
 
 // 米游币任务的 headers
-function getBBSHeaders() {
+function getBBSHeaders(json) {
     return {
         'accept-language': 'zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6,en;q=0.5',
         'x-rpc-device_id': uuidv4().replace('-', '').toLocaleUpperCase(),
@@ -738,11 +742,11 @@ function getBBSHeaders() {
         Referer: "https://app.mihoyo.com/",
         Host: 'bbs-api.mihoyo.com',
         'x-rpc-channel': 'appstore',
-        'x-rpc-app_version': '2.34.1',
+        'x-rpc-app_version': '2.35.2',
         'x-requested-with': 'com.mihoyo.hyperion',
         'x-rpc-client_type': '2',
         'Content-Type': 'application/json;charset=UTF-8',
-        DS: getDS('z8DRIUjNDT7IT5IZXvrUAxyupA1peND9'),
+        DS: json ? getDSV2('t0qEgfub6cvueAPgR5m9aQWWVciEer7v', '', json) : getDS('ZSHlXeQUBis52qD1kEgKt5lUYed4b7Bb'),
         'Cookie': bbsCookie
     }
 }
@@ -757,6 +761,17 @@ function getDS(n) {
     return `${i},${r},${c}`
 }
 
+// ds 的 v2 版本, 目前只有米游币任务签到接口用
+// n: salt
+// q: 目前暂时不清楚作用, 传空字符串
+// b: body 的 json 字符串
+function getDSV2(n, q, b) {
+    const i = Math.floor(new Date().getTime() / 1000) + ''
+    const r = `${getRandomInt(100001, 200000)}`
+    const c = md5(`salt=${n}&t=${i}&r=${r}&b=${b}&q=${q}`)
+    return `${i},${r},${c}`
+}
+
 /** 随机字符串获取 */
 function getRandomString(count) {
     const d = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678'
@@ -764,6 +779,11 @@ function getRandomString(count) {
     let n = ''
     for (var i = 0; i < count; i++) n += d.charAt(Math.floor(Math.random() * t))
     return n
+}
+
+/** 生成 [n, m] 的随机整数 */
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
 //============= 类与原型上添加方法 ======================

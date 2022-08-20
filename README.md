@@ -3,7 +3,7 @@
 
 ![platform](https://img.shields.io/badge/platform-quantumultx-lightgrey.svg) [![](https://img.shields.io/github/v/release/kayanouriko/quantumultx-genshin-autosign-helper)](https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/releases)
 
-一个 quantumultx 脚本, 主要用于米游社米游币任务和游戏签到的自动运行.
+一个 quantumultx 脚本, 主要用于米游社米游币任务和游戏(原神和崩坏3rd)签到的自动运行.
 
 ## 前言
 
@@ -20,6 +20,9 @@
     > 别家应用的用户可以自行测试一下, 行就行, 不行也别找我了Orz
 
 ## 更新日志
+* v2.3.0
+    1. 更新米游币任务相关接口相关参数
+        > 推荐更新一下自己的 cookie 防止出现问题
 * v2.2.0
     1. 更新 header 相关参数适配米游币新接口
     2. 更新图片资源
@@ -45,7 +48,7 @@
 * v1.0.0 
     1. 初版
 
-## 如何使用(2.x)
+## 如何使用
 
 v2.0.0开始, 在 quantumultx 中全面转为远程更新和执行, 配置一次, 自动更新, 永久运行.  
 
@@ -125,35 +128,6 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 | ![](./assets/rewrite-2.PNG) |
 | :-------------------------: |
 |  取消打勾操作<br>rewrite-2  |
-
-## 如何使用(1.x)
-
-1. 获取 cookie (感谢: [@Finger36](https://github.com/Finger36/genshin-helper))
-    1. 打开你的浏览器,进入**无痕/隐身模式**
-    2. 由于米哈游修改了 bbs 可以获取的 cookie，导致一次获取的 cookie 缺失，所以需要增加步骤
-    3. 打开 http://bbs.mihoyo.com/ys 并进行登入操作
-    4. 在上一步登入完成后新建标签页，打开 http://user.mihoyo.com 并进行登入操作
-    5. 按下键盘上的 F12 或右键检查,打开开发者工具,点击 Console
-    6. 复制以下代码并回车
-    ```javascript
-    var cookie = document.cookie
-    var ask = confirm('Cookie:' + cookie + '\n\nDo you want to copy the cookie to the clipboard?')
-    if (ask == true) {
-      copy(cookie)
-      msg = cookie
-    } else {
-      msg = 'Cancel'
-    }
-    ```
-    7. 此时`Cookie`已经复制到你的粘贴板上了
-
-2. 下载 js 文件: [releases](https://github.com/kayanouriko/quantumultx-genshin-autosign-helper/releases)
-3. 打开 js 文件, 在 `$.cookie = ''` 引号内填入步骤 1 获取到的 cookie, 将 js 文件复制到 quantumultx 的 script 文件夹内. quantumultx 应用配置一个脚本任务引用该 js 文件,设置每天凌晨定时运行一次.
-4. quantumultx 配置如下所示类似:
-```
-[task_local]
-1 0 * * * qx-genshin-autosign-helper.js
-```
 
 ## 感谢
 
