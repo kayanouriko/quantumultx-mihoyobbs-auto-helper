@@ -81,7 +81,7 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 
 |  ![](./assets/task-5.PNG)<br>![](./assets/rewrite-1.PNG)   |
 | :--------------------------------------------------------: |
-| 请求列表和重写落标如图所示即为添加成功<br>task-5 rewrite-1 |
+| 请求列表和重写列表如图所示即为添加成功<br>task-5 rewrite-1 |
 
 ### 获取 cookie
 
@@ -89,11 +89,15 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 | :-----------------------------------: |
 | 保证重写列表的为打开状态<br>rewrite-1 |
 
+> 重写需要配合 MitM 使用, 确保你的 MitM 也是开启状态
+
 打开米游社 app, 此时会弹出第一条获取成功的通知, 再随便打开一个游戏的签到页面, 会收到第二条获取成功的通知. 如下所示
 
 |       ![](./assets/rewrite-3.PNG)       |
 | :-------------------------------------: |
 | 获取 cookie 成功的两条通知<br>rewrite-3 |
+
+> 如果之前你的米游社 app 是处于后台开启状态, 可能需要清除后台, 重新打开米游社 app 才能收到米游币任务所需 cookie 获取成功的通知.
 
 关闭重写列表, 以后 cookie 失效了再重新打开重复以上步骤重新获取 cookie 即可.
 
