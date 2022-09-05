@@ -1,6 +1,6 @@
 /**
  * @name 米游社小助手
- * @version v2.3.0
+ * @version v2.3.1
  * @description 摆脱米游社 每天定时自动执行相关任务.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
@@ -72,7 +72,8 @@ const msgText = {
         bind: '请先前往米游社 App 手动签到一次!',
         signed: '旅行者"{0}"今日已领取过奖励.',
         success: '原神签到操作完成!\n旅行者"{0}"领取了奖励({1}x{2}).\n\n',
-        error: '原神签到操作未完成!\n{0}\n\n'
+        error: '原神签到操作未完成!\n{0}\n\n',
+        riskCode: '触发了风控验证码, 请重新运行脚本或者前往米游社 app 手动签到.'
     },
     // 崩坏3rd签到相关
     honkai3rd: {
@@ -336,7 +337,7 @@ async function micoinTask() {
         }
         return Promise.resolve(String.format(msgText.micoin.success, results))
     } catch (error) {
-        return Promise.resolve(String.format(msgText.micoin.error, error.message || error))
+        return Promise.resolve(String.format(msgText.micoin.error, error.message || (error instanceof Object ? JSON.stringify(error) : error)))
     }
 }
 
@@ -468,7 +469,6 @@ function postUpVotePost(post) {
 // 分享任务
 function getShareConf(post) {
     const postid = post?.post?.['post_id']
-    const subject = post?.post?.['subject'] ?? '未知帖子'
     if (!postid) { 
         return 0
     }
@@ -498,7 +498,7 @@ async function genshinSignTask() {
         await postSign(boards.genshin, game_uid, region)
         return Promise.resolve(String.format(msgText.genshin.success, nickname, name, count))
     } catch (error) {
-        return Promise.resolve(String.format(msgText.genshin.error, error.message || error))
+        return Promise.resolve(String.format(msgText.genshin.error, error.message || (error instanceof Object ? JSON.stringify(error) : error)))
     }
 }
 
@@ -572,7 +572,7 @@ async function honkai3rdSignTask() {
         await postSign(boards.honkai3rd, game_uid, region)
         return Promise.resolve(String.format(msgText.honkai3rd.success, nickname, name, count))
     } catch (error) {
-        return Promise.resolve(String.format(msgText.honkai3rd.error, error.message || error))
+        return Promise.resolve(String.format(msgText.honkai3rd.error, error.message || (error instanceof Object ? JSON.stringify(error) : error)))
     }
 }
 
@@ -669,9 +669,16 @@ function postSign(board, game_uid, region) {
         body: JSON.stringify(body)
     }
     return $.http.post(option).then(res => {
-        const { retcode, message } = JSON.parse(res.body)
+        const { retcode, message, data } = JSON.parse(res.body)
         if (retcode !== 0) {
             return Promise.reject(String.format(msgText.common.error, message))
+        }
+        if (board.forumid === 26) {
+            // 原神游戏签到需要进一步的判断是否触发风险验证码
+            const riskCode = data?.['risk_code'] ?? 0
+            if (riskCode !== 0) {
+                return Promise.reject(msgText.genshin.riskCode)
+            }
         }
     })
 }
@@ -713,42 +720,58 @@ function findBoardByID(forumid) {
 
 /** 米游社 api headers */
 
-// 签到的 headers
-function getHeaders(board) {
+// 通用参数
+const headers = {
+    // 论坛米游币相关参数
+    clientType: '2',
+    salt: 'ZSHlXeQUBis52qD1kEgKt5lUYed4b7Bb',
+    saltV2: 't0qEgfub6cvueAPgR5m9aQWWVciEer7v',
+    host: 'bbs-api.mihoyo.com',
+    // 游戏签到相关, 内嵌 webview, 所以用的是 web 相关参数
+    clientTypeWeb: '5',
+    saltWeb: 'N50pqm7FSy2AkFz2B3TqtuZMJ5TOl3Ep',
+    hostWeb: 'api-takumi.mihoyo.com',
+    // 通用参数
+    appVersion: '2.35.2',
+    userAgent: `Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/${this.appVersion}`,
+    deviceId: uuidv4().replace('-', '').toLocaleUpperCase(),
+    referer: 'https://app.mihoyo.com/'
+}
+
+// 构建基础 headers
+function getBaseHeaders() {
     return {
-        'accept-language': 'zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6,en;q=0.5',
-        'x-rpc-device_id': uuidv4().replace('-', '').toLocaleUpperCase(),
-        'User-Agent':
-            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.34.1',
-        Referer: board.getReferer(),
-        Host: 'api-takumi.mihoyo.com',
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'x-rpc-device_id': headers.deviceId,
+        'User-Agent': headers.userAgent,
         'x-rpc-channel': 'appstore',
-        'x-rpc-app_version': '2.35.2',
+        'x-rpc-app_version': headers.appVersion,
         'x-requested-with': 'com.mihoyo.hyperion',
-        'x-rpc-client_type': '5',
-        'Content-Type': 'application/json;charset=UTF-8',
-        DS: getDS('N50pqm7FSy2AkFz2B3TqtuZMJ5TOl3Ep'),
-        'Cookie': signCookie
+        'Content-Type': 'application/json;charset=UTF-8'
     }
+}
+
+// 游戏签到的 headers, 用的是 webview , 所以用的是 web 相关的参数
+function getHeaders(board) {
+    let gameHeaders = getBaseHeaders()
+    gameHeaders['Referer'] = board.getReferer()
+    gameHeaders['Host'] = headers.hostWeb
+    gameHeaders['DS'] = getDS(headers.saltWeb)
+    gameHeaders['x-rpc-client_type'] = headers.clientTypeWeb
+    gameHeaders['Cookie'] = signCookie
+    return gameHeaders
 }
 
 // 米游币任务的 headers
 function getBBSHeaders(json) {
-    return {
-        'accept-language': 'zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6,en;q=0.5',
-        'x-rpc-device_id': uuidv4().replace('-', '').toLocaleUpperCase(),
-        'User-Agent':
-            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.34.1',
-        Referer: "https://app.mihoyo.com/",
-        Host: 'bbs-api.mihoyo.com',
-        'x-rpc-channel': 'appstore',
-        'x-rpc-app_version': '2.35.2',
-        'x-requested-with': 'com.mihoyo.hyperion',
-        'x-rpc-client_type': '2',
-        'Content-Type': 'application/json;charset=UTF-8',
-        DS: json ? getDSV2('t0qEgfub6cvueAPgR5m9aQWWVciEer7v', '', json) : getDS('ZSHlXeQUBis52qD1kEgKt5lUYed4b7Bb'),
-        'Cookie': bbsCookie
-    }
+    let bbsHeaders = getBaseHeaders()
+    bbsHeaders['Referer'] = headers.referer
+    bbsHeaders['Host'] = headers.host
+    bbsHeaders['DS'] = json ? getDSV2(headers.saltV2, '', json) : getDS(headers.salt)
+    bbsHeaders['x-rpc-client_type'] = headers.clientType
+    bbsHeaders['Cookie'] = bbsCookie
+    return bbsHeaders
 }
 
 /** ds 获取 */
