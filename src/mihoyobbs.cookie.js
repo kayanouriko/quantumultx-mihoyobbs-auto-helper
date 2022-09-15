@@ -1,7 +1,7 @@
 /**
- * @name 米游社小助手-cookie
- * @version v1.0.0
- * @description 用于获取米游币任务和签到任务的 cookie
+ * @name 米游社小助手-headers
+ * @version v1.1.0
+ * @description 用于获取米游币任务和签到任务的 headers
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
  * @thanks chavyleung, 各家应用环境的统一封装
@@ -9,48 +9,39 @@
  * @license MIT
  */
 
-const $ = new Env('米游社小助手-cookie')
+const $ = new Env('米游社小助手-headers')
 /** URL */
 const BBS_URL = 'https://bbs-api.mihoyo.com/apihub/api/getGameList'
 const SIGN_URL = 'https://api-takumi.mihoyo.com/binding/api/getUserGameRoles'
-/** 常量 */
-const LOGIN_TICKET = 'login_ticket'
-const ACCOUNT_ID = 'account_id'
-const COOKIE_TOKEN = 'cookie_token'
 /** 存储的 key */
-const BBS_COOKIE_KEY = 'kayanouriko_mihoyobbs_cookie_bbs'
-const SIGN_COOKIE_KEY = 'kayanouriko_mihoyobbs_cookie_sign'
+const BBS_HEADERS_KEY = 'kayanouriko_mihoyobbs_headers_bbs'
+const SIGN_HEADERS_KEY = 'kayanouriko_mihoyobbs_headers_sign'
 
 /** 主入口 */
 main()
 
+/**
+ * 1.1.0 版本开始直接存储整个 headers, 用于处理原神签到风控问题
+ */
 function main() {
     const url = $request.url
     const result = url.split('?')?.[0]
-    const cookie = $request?.headers?.['Cookie']
-    if (cookie) {
+    const headers = $request?.headers
+    if (headers) {
         if (result === BBS_URL) {
             // 米游币任务的 url
-            if ($.setdata(cookie, BBS_COOKIE_KEY)) {
-                $.msg('米游社小助手-cookie', `米游币任务所需的 cookie 获取成功!`)
+            if ($.setdata(JSON.stringify(headers), BBS_HEADERS_KEY)) {
+                $.msg('米游社小助手-headers', '米游币任务所需的 headers 获取成功!')
             }
         } else if (result === SIGN_URL) {
             // 签到任务的 url
-            if (checkCookieByName(cookie, LOGIN_TICKET) && checkCookieByName(cookie, ACCOUNT_ID) && checkCookieByName(cookie, COOKIE_TOKEN)) {
-                if ($.setdata(cookie, SIGN_COOKIE_KEY)) {
-                    $.msg('米游社小助手-cookie', '签到任务所需的 cookie 获取成功!')
-                }
+            if ($.setdata(JSON.stringify(headers), SIGN_HEADERS_KEY)) {
+                $.msg('米游社小助手-headers', '签到任务所需的 headers 获取成功!')
             }
         }
     }
     // 传入空对象不改变原来的请求
     $.done({})
-}
-
-/** 获取 cookie key 对应的值 */
-function checkCookieByName(cookie, name) {
-    const match = cookie.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'))
-    return match ? match?.[1] : undefined
 }
 
 /**

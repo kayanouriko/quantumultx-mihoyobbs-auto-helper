@@ -1,6 +1,6 @@
 /**
  * @name 米游社小助手
- * @version v2.3.1
+ * @version v2.4.0
  * @description 摆脱米游社 每天定时自动执行相关任务.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
@@ -34,7 +34,7 @@ const msgText = {
     },
     // cookie 相关
     cookie: {
-        empty: '请先运行获取 cookie 的脚本. 点击该通知将跳转获取 cookie 的教程页面.'
+        empty: '请先打开该脚本配套重写规则更新后获取 headers, 再重新运行该脚本. 点击该通知将跳转获取 headers 的教程页面.',
     },
     common: {
         user: '获取账号信息有误, 错误信息: {0}.',
@@ -73,7 +73,7 @@ const msgText = {
         signed: '旅行者"{0}"今日已领取过奖励.',
         success: '原神签到操作完成!\n旅行者"{0}"领取了奖励({1}x{2}).\n\n',
         error: '原神签到操作未完成!\n{0}\n\n',
-        riskCode: '触发了风控验证码, 请重新运行脚本或者前往米游社 app 手动签到.'
+        riskCode: '触发了风控验证码, 请前往米游社 app 手动签到.'
     },
     // 崩坏3rd签到相关
     honkai3rd: {
@@ -179,11 +179,11 @@ const api = {
     }
 }
 
-/** cookie */
-// 米游币相关的 cookie
-const bbsCookie = $.getdata('kayanouriko_mihoyobbs_cookie_bbs')
-// 签到相关的 cookie
-const signCookie = $.getdata('kayanouriko_mihoyobbs_cookie_sign')
+/** headers */
+// 米游币相关的 headers
+const bbsHeadersString = $.getdata('kayanouriko_mihoyobbs_headers_bbs')
+// 签到相关的 headers
+const signHeadersString = $.getdata('kayanouriko_mihoyobbs_headers_sign')
 
 /**
  * 脚本的配置文件
@@ -227,17 +227,17 @@ async function main() {
         for (const id of config.tasks) {
             switch (id) {
                 case 1:
-                    await checkBBSCookie()
+                    await checkBBSHeaders()
                     const micoinResult = await micoinTask()
                     results += micoinResult
                     break
                 case 2:
-                    await checkSignCookie()
+                    await checkSignHeaders()
                     const genshinResult = await genshinSignTask()
                     results += genshinResult
                     break
                 case 3:
-                    await checkSignCookie()
+                    await checkSignHeaders()
                     const honkai3rdResult = await honkai3rdSignTask()
                     results += honkai3rdResult
                     break
@@ -260,21 +260,24 @@ async function main() {
     }
 }
 
-//==== cookie 检查 ====
-function checkSignCookie() {
-    if (!signCookie) {
+//==== headers 检查 ====
+// v2.4.0 开始, 获取的不在是 cookie, 而是 headers
+function checkSignHeaders() {
+    $.log(signHeadersString)
+    if (!signHeadersString) {
         return Promise.reject(msgText.cookie.empty)
     }
 }
 
-function checkBBSCookie() {
-    if (!bbsCookie) {
+function checkBBSHeaders() {
+    if (!bbsHeadersString) {
         return Promise.reject(msgText.cookie.empty)
     }
 }
 
 //==== 米游币任务 ====
-// @todo 这里少请求一个米游社用户信息的接口, 获取不到 cookie 的 nickname, 最后脚本提醒时无法显示用户名字
+// 这里少请求一个米游社用户信息的接口, 获取不到 cookie 的 nickname, 最后脚本提醒时无法显示用户名字
+// 不过无关紧要, 尽量减少请求接口的数量, 这个 todo 消除
 async function micoinTask() {
     try {
         // 获取执行任务的 board
@@ -724,53 +727,39 @@ function findBoardByID(forumid) {
 const headers = {
     // 论坛米游币相关参数
     clientType: '2',
-    salt: 'ZSHlXeQUBis52qD1kEgKt5lUYed4b7Bb',
+    salt: 'n0KjuIrKgLHh08LWSCYP0WXlVXaYvV64',
     saltV2: 't0qEgfub6cvueAPgR5m9aQWWVciEer7v',
-    host: 'bbs-api.mihoyo.com',
     // 游戏签到相关, 内嵌 webview, 所以用的是 web 相关参数
     clientTypeWeb: '5',
-    saltWeb: 'N50pqm7FSy2AkFz2B3TqtuZMJ5TOl3Ep',
-    hostWeb: 'api-takumi.mihoyo.com',
+    saltWeb: 'YVEIkzDFNHLeKXLxzqCA9TzxCpWwbIbk',
     // 通用参数
-    appVersion: '2.35.2',
-    userAgent: `Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/${this.appVersion}`,
+    appVersion: '2.36.1',
     deviceId: uuidv4().replace('-', '').toLocaleUpperCase(),
-    referer: 'https://app.mihoyo.com/'
 }
 
-// 构建基础 headers
+// 2.4.0 改用 headers 之后, 公用参数目前只剩下这两个了.
+// 改用 headers 的原因是为了获取用户的 useragent, 不单独拎出来是因为只要控制需要变得比较容易
 function getBaseHeaders() {
     return {
-        'Accept-Language': 'zh-CN,zh;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'x-rpc-device_id': headers.deviceId,
-        'User-Agent': headers.userAgent,
-        'x-rpc-channel': 'appstore',
         'x-rpc-app_version': headers.appVersion,
-        'x-requested-with': 'com.mihoyo.hyperion',
-        'Content-Type': 'application/json;charset=UTF-8'
+        'x-rpc-device_id': headers.deviceId
     }
 }
 
 // 游戏签到的 headers, 用的是 webview , 所以用的是 web 相关的参数
 function getHeaders(board) {
-    let gameHeaders = getBaseHeaders()
-    gameHeaders['Referer'] = board.getReferer()
-    gameHeaders['Host'] = headers.hostWeb
-    gameHeaders['DS'] = getDS(headers.saltWeb)
-    gameHeaders['x-rpc-client_type'] = headers.clientTypeWeb
-    gameHeaders['Cookie'] = signCookie
-    return gameHeaders
+    let signHeaders = Object.assign(JSON.parse(signHeadersString), getBaseHeaders())
+    signHeaders['Referer'] = board.getReferer()
+    signHeaders['DS'] = getDS(headers.saltWeb)
+    signHeaders['x-rpc-client_type'] = headers.clientTypeWeb
+    return signHeaders
 }
 
 // 米游币任务的 headers
 function getBBSHeaders(json) {
-    let bbsHeaders = getBaseHeaders()
-    bbsHeaders['Referer'] = headers.referer
-    bbsHeaders['Host'] = headers.host
+    let bbsHeaders = Object.assign(JSON.parse(bbsHeadersString), getBaseHeaders())
     bbsHeaders['DS'] = json ? getDSV2(headers.saltV2, '', json) : getDS(headers.salt)
     bbsHeaders['x-rpc-client_type'] = headers.clientType
-    bbsHeaders['Cookie'] = bbsCookie
     return bbsHeaders
 }
 

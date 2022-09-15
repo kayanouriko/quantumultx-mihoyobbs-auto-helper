@@ -24,6 +24,9 @@
     > 推荐点击项目右上角的 watch 按钮, 选择 custom 里面 Releases, 这样当脚本释出新版本时你能第一时间获取邮件通知以便在 quantumultx 内更新脚本.
 
 ## 更新日志
+* v2.4.0
+    1. 修复原神签到风控问题
+        > 注意需要同时更新配套的重写规则并重新获取 headers. 更加详细说明参照下文 *关于原神签到的说明* 部分
 * v2.3.1
     1. 原神签到添加风控验证码的判断
     2. 优化 headers 代码逻辑
@@ -138,6 +141,16 @@ https://raw.githubusercontent.com/kayanouriko/quantumultx-mihoyobbs-auto-helper/
 | ![](./assets/rewrite-2.PNG) |
 | :-------------------------: |
 |  取消打勾操作<br>rewrite-2  |
+
+## 关于原神签到的说明
+
+米哈游在 2.33.1 版本左右单独为原神的签到加入了 CAPTCHA 测试.
+
+在 [#179](https://github.com/Womsxd/AutoMihoyoBBS/issues/179) 的讨论中基本确定是针对 UserAgent 进行识别, 感谢大佬们的分析. 所以从 v2.4.0 版本起, 该脚本将获取用户整个请求的 headers 作为数据存储用以解决该问题.
+
+而对于需要原神签到的用户, 之前出现过风控问题需要到 app 手动签到直至风控验证码消失, 再将本脚本更新到 v2.4.0 版本以及配套重写规则更新到 v1.1.0, 并打开重写规则重新获取 headers 数据, 即可解决风控问题. 
+
+在以后手机系统和米游社 app 升级后, 都必须及时打开重写规则更新自己的 headers 防止风控问题.
 
 ## 感谢
 
