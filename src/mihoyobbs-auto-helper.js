@@ -1,6 +1,6 @@
 /**
  * @name 米游社小助手
- * @version v2.4.0
+ * @version v2.4.1
  * @description 摆脱米游社 每天定时自动执行相关任务.
  * @author kayanouriko
  * @homepage https://github.com/kayanouriko/quantumultx-mihoyobbs-auto-helper
@@ -263,7 +263,6 @@ async function main() {
 //==== headers 检查 ====
 // v2.4.0 开始, 获取的不在是 cookie, 而是 headers
 function checkSignHeaders() {
-    $.log(signHeadersString)
     if (!signHeadersString) {
         return Promise.reject(msgText.cookie.empty)
     }
@@ -727,13 +726,13 @@ function findBoardByID(forumid) {
 const headers = {
     // 论坛米游币相关参数
     clientType: '2',
-    salt: 'n0KjuIrKgLHh08LWSCYP0WXlVXaYvV64',
+    salt: '6J1hde1Wu02eF1DFlLpMjeg2dMloAytL',
     saltV2: 't0qEgfub6cvueAPgR5m9aQWWVciEer7v',
     // 游戏签到相关, 内嵌 webview, 所以用的是 web 相关参数
     clientTypeWeb: '5',
-    saltWeb: 'YVEIkzDFNHLeKXLxzqCA9TzxCpWwbIbk',
+    saltWeb: 'Qqx8cyv7kuyD8fTw11SmvXSFHp7iZD29',
     // 通用参数
-    appVersion: '2.36.1',
+    appVersion: '2.37.1',
     deviceId: uuidv4().replace('-', '').toLocaleUpperCase(),
 }
 
